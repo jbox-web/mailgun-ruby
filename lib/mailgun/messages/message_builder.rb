@@ -1,4 +1,3 @@
-require 'mime/types'
 require 'time'
 
 module Mailgun
@@ -460,8 +459,9 @@ module Mailgun
       ) unless attachment.respond_to?(:read)
 
       if attachment.respond_to?(:path) && !attachment.respond_to?(:content_type)
-        mime_types = MIME::Types.type_for(attachment.path)
-        content_type = mime_types.empty? ? 'application/octet-stream' : mime_types[0].content_type
+        mime = MiniMime.lookup_by_filename attachment.path
+        content_type = mime ? mime.content_type : 'application/octet-stream'
+
         attachment.instance_eval "def content_type; '#{content_type}'; end"
       end
 
